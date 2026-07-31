@@ -10,7 +10,6 @@ class SettingsView extends StatelessWidget {
       color: const Color(0xFFF8FAFC),
       child: Column(
         children: [
-       
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
             decoration: const BoxDecoration(
@@ -829,7 +828,7 @@ class _DeleteShopListScreenState extends State<DeleteShopListScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  "ID: ${shop['shop_id']}",
+                                  "SHOP_ID: ${shop['shop_id']}",
                                   style: const TextStyle(
                                     color: Color(0xFF64748B),
                                     fontSize: 12,

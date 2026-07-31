@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_affair/screens/login_screen.dart';
@@ -11,6 +9,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Material App', home: LoginView());
+    return MaterialApp(
+      title: 'Material App',
+      debugShowCheckedModeBanner: false,
+      home: LoginView(),
+    );
   }
 }

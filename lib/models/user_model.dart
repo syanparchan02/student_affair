@@ -1,32 +1,40 @@
-// models/user_model.dart
+import 'package:json_annotation/json_annotation.dart';
+
+part 'user_model.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class UserModel {
+  @JsonKey(name: 'user_id')
   final int userId;
-  final String userName;
-  final String userPhone;
-  final String userEmail;
-  final String roleName;
+  
+  @JsonKey(name: 'user_name')
+  final String? userName;
+  
+  @JsonKey(name: 'user_phone')
+  final String? userPhone;
+  
+  @JsonKey(name: 'user_email')
+  final String? userEmail;
+  
+  @JsonKey(name: 'role_name')
+  final String? roleName;
+  
+  @JsonKey(name: 'is_password_changed')
   final int isPasswordChanged;
+  
+  @JsonKey(name: 'fcm_token')
   final String? fcmToken;
 
   UserModel({
     required this.userId,
-    required this.userName,
-    required this.userPhone,
-    required this.userEmail,
-    required this.roleName,
+    this.userName,
+    this.userPhone,
+    this.userEmail,
+    this.roleName,
     required this.isPasswordChanged,
     this.fcmToken,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      userId: json['user_id'],
-      userName: json['user_name'],
-      userPhone: json['user_phone'],
-      userEmail: json['user_email'],
-      roleName: json['role_name'],
-      isPasswordChanged: json['is_password_changed'],
-      fcmToken: json['fcm_token'],
-    );
-  }
+  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+  Map<String, dynamic> toJson() => _$UserModelToJson(this);
 }

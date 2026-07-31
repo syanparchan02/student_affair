@@ -1,71 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:student_affair/service/api_service.dart';
 
-class TransferView extends StatefulWidget {
+class WithdrawView extends StatefulWidget {
   final VoidCallback onBackButtonPressed;
-  final String selectedTransferCategory;
+  final String selectedCategory;
   final Function(String) onCategorySelected;
-  final List<Map<String, dynamic>> filteredTransfers;
+  final List<Map<String, dynamic>> filteredHistory;
 
-  const TransferView({
+  const WithdrawView({
     super.key,
     required this.onBackButtonPressed,
-    required this.selectedTransferCategory,
+    required this.selectedCategory,
     required this.onCategorySelected,
-    required this.filteredTransfers,
+    required this.filteredHistory,
   });
 
   @override
-  State<TransferView> createState() => _TransferViewState();
+  State<WithdrawView> createState() => _WithdrawViewState();
 }
 
-class _TransferViewState extends State<TransferView> {
+class _WithdrawViewState extends State<WithdrawView> {
   int _currentStep = 0;
 
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
 
-  // ၆ လုံးအတွက် Controllers များနှင့် FocusNodes များ (Pinput ပုံစံအတွက်)
   final List<TextEditingController> _pinControllers = List.generate(
     6,
     (_) => TextEditingController(),
   );
   final List<FocusNode> _pinFocusNodes = List.generate(6, (_) => FocusNode());
 
-  // API ခေါ်နေစဉ် Loading ဖြစ်နေသည်ကို ပြသရန် variable
   bool _isLoading = false;
+  bool _isHistoryLoading = false;
 
-  // API မှ ရလာမည့် History ဒေတာများကို သိမ်းရန်
-  bool _isHistoryLoading = true;
-  List<Map<String, dynamic>> _apiTransfers = [];
+  final double _conversionRate =
+      0.8; // ၁၀ ပွိုင့်လျှင် ၈ ကျပ် (1 Point = 0.8 Kyats)
+  double _calculatedCash = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _fetchTransferHistory();
+    _amountController.addListener(_calculateCashAmount);
   }
 
-  // API ဖြင့် Recent Transfers များကို လှမ်းခေါ်သည့် Method
-  Future<void> _fetchTransferHistory() async {
-    try {
-      final data = await ApiService().getAllHistory();
-      setState(() {
-        _apiTransfers = List<Map<String, dynamic>>.from(data);
-        _isHistoryLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isHistoryLoading = false;
-      });
-      _showCustomSnackBar(
-        message: "Failed to load history: ${e.toString()}",
-        icon: Icons.error_outline_rounded,
-        backgroundColor: const Color(0xFFEF4444),
-      );
-    }
+  void _calculateCashAmount() {
+    double points = double.tryParse(_amountController.text) ?? 0.0;
+    setState(() {
+      _calculatedCash = points * _conversionRate;
+    });
   }
 
-  // SnackBar ကို လှပစေရန် helper method
   void _showCustomSnackBar({
     required String message,
     required IconData icon,
@@ -152,9 +137,9 @@ class _TransferViewState extends State<TransferView> {
                         },
                       ),
                     const Text(
-                      "Top Up Points",
+                      "ငွေထုတ်ယူရန်",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A),
                         letterSpacing: -0.5,
@@ -190,7 +175,7 @@ class _TransferViewState extends State<TransferView> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
               child: _currentStep == 0
-                  ? _buildTransferInputView()
+                  ? _buildWithdrawInputView()
                   : _currentStep == 1
                   ? _buildPinVerificationView()
                   : _buildSuccessView(),
@@ -201,22 +186,8 @@ class _TransferViewState extends State<TransferView> {
     );
   }
 
-  // Step 0: Phone Number, Amount & Recent Transfers
-  Widget _buildTransferInputView() {
-    List<Map<String, dynamic>> displayedTransfers = _apiTransfers.where((
-      transfer,
-    ) {
-      final role = transfer['role_name']?.toString().toLowerCase() ?? '';
-      if (widget.selectedTransferCategory == "Students") {
-        return role == 'student';
-      } else if (widget.selectedTransferCategory == "Teachers") {
-        return role == 'teacher';
-      } else if (widget.selectedTransferCategory == "Shop") {
-        return role == 'shop';
-      }
-      return true;
-    }).toList();
-
+  // Step 0: Phone Number, Amount & Calculation Preview
+  Widget _buildWithdrawInputView() {
     return Column(
       children: [
         Container(
@@ -244,7 +215,7 @@ class _TransferViewState extends State<TransferView> {
 
               // Phone Number Field
               const Text(
-                "Recipient Phone Number",
+                "လက်ခံမည့် ဖုန်းနံပါတ်",
                 style: TextStyle(
                   fontSize: 13,
                   color: Color(0xFF64748B),
@@ -283,9 +254,9 @@ class _TransferViewState extends State<TransferView> {
               ),
               const SizedBox(height: 16),
 
-              // Amount Field
+              // Amount Field (Points)
               const Text(
-                "Transfer Amount Point",
+                "ထုတ်ယူမည့် ပွိုင့်ပမာဏ (Points)",
                 style: TextStyle(
                   fontSize: 13,
                   color: Color(0xFF64748B),
@@ -301,13 +272,10 @@ class _TransferViewState extends State<TransferView> {
                 ),
                 child: Row(
                   children: [
-                    const Text(
-                      "\$",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0D9488),
-                        fontSize: 16,
-                      ),
+                    const Icon(
+                      Icons.monetization_on_rounded,
+                      color: Color(0xFF0D9488),
+                      size: 20,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -315,9 +283,41 @@ class _TransferViewState extends State<TransferView> {
                         controller: _amountController,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          hintText: "0.00",
+                          hintText: "100",
                           border: InputBorder.none,
                         ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Calculated Cash Box (10 Points = 8 Kyats)
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDFA),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF99F6E4)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "ရရှိမည့် ငွေပမာဏ (ကျပ်):",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    Text(
+                      "${_calculatedCash.toStringAsFixed(0)} ကျပ်",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0D9488),
                       ),
                     ),
                   ],
@@ -338,7 +338,8 @@ class _TransferViewState extends State<TransferView> {
                       });
                     } else {
                       _showCustomSnackBar(
-                        message: "Please fill phone number and amount",
+                        message:
+                            "ကျေးဇူးပြု၍ ဖုန်းနံပါတ်နှင့် ပွိုင့်ပမာဏကို ဖြည့်ပါ။",
                         icon: Icons.error_outline_rounded,
                         backgroundColor: const Color(0xFFEF4444),
                       );
@@ -364,158 +365,12 @@ class _TransferViewState extends State<TransferView> {
             ],
           ),
         ),
-        const SizedBox(height: 20),
-
-        // Recent Transfers Section
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF64748B).withOpacity(0.06),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Recent Transfers",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: ["All", "Students", "Teachers", "Shop"].map((
-                  category,
-                ) {
-                  bool selected = widget.selectedTransferCategory == category;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => widget.onCategorySelected(category),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.symmetric(horizontal: 2),
-                        padding: const EdgeInsets.symmetric(vertical: 9),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? const Color(0xFF0D9488)
-                              : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          category,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: selected
-                                ? Colors.white
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              _isHistoryLoading
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF0D9488),
-                        ),
-                      ),
-                    )
-                  : displayedTransfers.isEmpty
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Text(
-                          "No transfer history found",
-                          style: TextStyle(color: Color(0xFF64748B)),
-                        ),
-                      ),
-                    )
-                  : ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: displayedTransfers.length,
-                      separatorBuilder: (context, index) {
-                        return const Divider(
-                          height: 20,
-                          color: Color(0xFFF1F5F9),
-                        );
-                      },
-                      itemBuilder: (context, index) {
-                        final transfer = displayedTransfers[index];
-
-                        final name = transfer['user_name']?.toString() ?? '';
-                        final roleName =
-                            transfer['role_name']?.toString() ?? '';
-                        final amount = transfer['amount']?.toString() ?? '';
-                        final date = transfer['date']?.toString() ?? '';
-                        final phone = transfer['user_phone']?.toString() ?? '';
-
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Color(0xFFF1F5F9),
-                            child: Icon(
-                              Icons.person,
-                              color: Color(0xFF0D9488),
-                              size: 20,
-                            ),
-                          ),
-                          title: Text(
-                            name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Color(0xFF1E293B),
-                            ),
-                          ),
-                          subtitle: Text(
-                            "Role: $roleName | $date",
-                            style: const TextStyle(
-                              color: Color(0xFF64748B),
-                              fontSize: 11,
-                            ),
-                          ),
-                          trailing: Text(
-                            amount,
-                            style: TextStyle(
-                              color: amount.contains('+')
-                                  ? const Color(0xFF0D9488)
-                                  : Colors.redAccent,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          onTap: () {
-                            _phoneController.text = phone;
-                          },
-                        );
-                      },
-                    ),
-            ],
-          ),
-        ),
       ],
     );
   }
 
-  // Step 1: PIN Verification (6 Digits Individual Boxes) & Confirm Transfer Button
+  // Step 1: PIN Verification (6 Digits Individual Boxes) & Confirm Button
+  // Step 1: PIN Verification (6 Digits Individual Boxes) & Confirm Button
   Widget _buildPinVerificationView() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -540,22 +395,22 @@ class _TransferViewState extends State<TransferView> {
           ),
           const SizedBox(height: 16),
           const Text(
-            "Enter Security PIN",
+            "လုံခြုံရေး PIN နံပါတ်ထည့်ပါ",
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            "Transferring \$${_amountController.text} to +95 ${_phoneController.text}",
+            "ဖုန်းနံပါတ် (+95 ${_phoneController.text}) သို့ ${_calculatedCash.toStringAsFixed(0)} ကျပ် ထုတ်ယူမှုကို အတည်ပြုရန် ခြောက်လုံးပါ PIN နံပါတ်ကို ထည့်ပါ။",
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
           ),
           const SizedBox(height: 30),
 
-          // 6-Digit Individual Pinput Boxes (Logic မပြောင်းဘဲ ပုံစံအသစ်ဖြင့်)
+          // 6-Digit Individual Pinput Boxes
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(6, (index) {
@@ -603,7 +458,7 @@ class _TransferViewState extends State<TransferView> {
           ),
           const SizedBox(height: 30),
 
-          // Confirm Transfer Button
+          // Confirm Withdraw Button (API ချိတ်ဆက်ထားသည်)
           SizedBox(
             width: double.infinity,
             height: 52,
@@ -611,7 +466,6 @@ class _TransferViewState extends State<TransferView> {
               onPressed: _isLoading
                   ? null
                   : () async {
-                      // controllers ခြောက်ခုမှ pin များကို ပေါင်းယူခြင်း
                       String fullPin = _pinControllers
                           .map((c) => c.text)
                           .join();
@@ -622,40 +476,43 @@ class _TransferViewState extends State<TransferView> {
                         });
 
                         try {
-                          double amountValue =
+                          double amountVal =
                               double.tryParse(_amountController.text) ?? 0.0;
 
-                          await ApiService().topupByPhone(
-                            phone: _phoneController.text,
-                            amount: amountValue,
+                          // ApiService ကိုခေါ်ဆိုခြင်း
+                          await ApiService().exchangePoint(
+                            shopId: 4, // လိုအပ်သော shop_id ထည့်ရန်
+                            phone: _phoneController.text.trim(),
+                            amount: amountVal,
                             pin: fullPin,
                           );
 
                           setState(() {
-                            _currentStep = 2;
+                            _isLoading = false;
+                            _currentStep = 2; // အောင်မြင်သော Step သို့သွားမည်
                           });
 
                           _showCustomSnackBar(
-                            message: "Transfer successful!",
+                            message: "ငွေထုတ်ယူမှု အောင်မြင်ပါသည်!",
                             icon: Icons.check_circle_rounded,
                             backgroundColor: const Color(0xFF10B981),
                           );
-
-                          _fetchTransferHistory();
                         } catch (e) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+
+                          // API Error ပြရန်
                           _showCustomSnackBar(
                             message: e.toString(),
                             icon: Icons.error_outline_rounded,
                             backgroundColor: const Color(0xFFEF4444),
                           );
-                        } finally {
-                          setState(() {
-                            _isLoading = false;
-                          });
                         }
                       } else {
                         _showCustomSnackBar(
-                          message: "Please enter a valid PIN",
+                          message:
+                              "ကျေးဇူးပြု၍ PIN နံပါတ် ၆ လုံး အပြည့်ထည့်ပါ။",
                           icon: Icons.warning_amber_rounded,
                           backgroundColor: const Color(0xFFF59E0B),
                         );
@@ -678,7 +535,7 @@ class _TransferViewState extends State<TransferView> {
                       ),
                     )
                   : const Text(
-                      "Confirm Transfer",
+                      "အတည်ပြုမည်",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -724,19 +581,15 @@ class _TransferViewState extends State<TransferView> {
           ),
           const SizedBox(height: 20),
           const Text(
-            "Transfer Successful!",
+            "ငွေထုတ်ယူမှုအောင်မြင်ပါသည်",
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            "Successfully sent ${_amountController.text} Points to ${_phoneController.text}",
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
-          ),
+
           const SizedBox(height: 30),
           SizedBox(
             width: double.infinity,
@@ -750,6 +603,7 @@ class _TransferViewState extends State<TransferView> {
                   for (var controller in _pinControllers) {
                     controller.clear();
                   }
+                  _calculatedCash = 0.0;
                 });
                 widget.onBackButtonPressed();
               },

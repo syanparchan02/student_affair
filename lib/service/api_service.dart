@@ -91,4 +91,96 @@ class ApiService {
           'ဆိုင်အကောင့်ဖွင့်ခြင်း မအောင်မြင်ပါ။';
     }
   }
+
+  Future<List<dynamic>> fetchAdminShopMenus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token =
+          prefs.getString('token') ?? ''; // Login ဝင်စဉ်က သိမ်းခဲ့သော Key
+
+      final response = await _dio.get(
+        ApiEndpoints.adminShopMenus,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      // Server မှ Response ထွက်လာပုံပေါ်မူတည်၍ List ပြန်ရန်
+      if (response.data is List) {
+        return response.data;
+      } else if (response.data['data'] is List) {
+        return response.data['data'];
+      }
+      return [];
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ??
+          'ဆိုင်နှင့် မီနူးအချက်အလက်များကို ထုတ်ယူ၍မရပါ။';
+    }
+  }
+
+  Future<Map<String, dynamic>> topupByPhone({
+    required String phone,
+    required double amount,
+    required String pin,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await _dio.post(
+        ApiEndpoints.topupbypone, // ApiEndpoints ထဲပါသည့် route ကို သုံးခြင်း
+        data: {"phone": phone, "amount": amount, "pin": pin},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token', // Token ထည့်ခြင်း[cite: 1]
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'ငွေလွှဲခြင်း မအောင်မြင်ပါ။';
+    }
+  }
+
+  Future<List<dynamic>> getAllHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await _dio.get(
+        ApiEndpoints
+            .allHistory, // ApiEndpoints ထဲရှိ allhistory route ကိုသုံးခြင်း
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      // Server မှ Response ထွက်လာပုံပေါ်မူတည်၍ List ပြန်ရန်
+      if (response.data is List) {
+        return response.data;
+      } else if (response.data['data'] is List) {
+        return response.data['data'];
+      }
+      return [];
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'မှတ်တမ်းများကို ထုတ်ယူ၍မရပါ။';
+    }
+  }
+
+  Future<Map<String, dynamic>> exchangePoint({
+    required int shopId,
+    required String phone,
+    required double amount,
+    required String pin,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await _dio.post(
+        ApiEndpoints.exchangePoint,
+        data: {"shop_id": shopId, "phone": phone, "amount": amount, "pin": pin},
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'ပွိုင့်လဲလှယ်ခြင်း မအောင်မြင်ပါ။';
+    }
+  }
 }

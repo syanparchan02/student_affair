@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:student_affair/models/shop.dart';
+
+import 'package:student_affair/models/shop_model.dart';
+import 'package:student_affair/screens/QrScan_screen.dart';
+import 'package:student_affair/service/api_service.dart';
+import 'package:student_affair/widgets/withdraw_screen.dart';
 
 import '../widgets/shop_list_screen.dart';
 import '../widgets/transfer_screen.dart';
@@ -16,42 +20,13 @@ class RestaurantAdminDashboardScreen extends StatefulWidget {
 
 class _RestaurantAdminDashboardScreenState
     extends State<RestaurantAdminDashboardScreen> {
+  final ApiService _apiService = ApiService();
+
   int _currentIndex = 0;
   String _selectedTransferCategory = "All";
 
-  // Exchange variables for Index 3
-  String _fromCurrency = 'MMK (ကျပ်)';
-  String _toCurrency = 'USD (ဒေါ်လာ)';
-  final TextEditingController _exchangeController = TextEditingController();
-  final double _exchangeRate = 2100.0;
-
-  final List<Shop> _allShops = [
-    Shop(
-      id: "SHP-10293",
-      name: "ရွှေမန်းသူ စားသောက်ဆိုင်",
-      owner: "ဦးအောင်ကျော်",
-      phone: "09 123 456 789",
-      status: "open",
-      img: "https://placehold.co/60x60/teal/white?text=Shop",
-    ),
-    Shop(
-      id: "SHP-10294",
-      name: "မြန်မာ့လက်ရာ",
-      owner: "ဒေါ်ခင်မာ",
-      phone: "09 987 654 321",
-      status: "closed",
-      img: "https://placehold.co/60x60/orange/white?text=Shop",
-    ),
-    Shop(
-      id: "SHP-10295",
-      name: "မင်္ဂလာ စားသောက်ဆိုင်",
-      owner: "ကိုမျိုး",
-      phone: "09 444 555 666",
-      status: "open",
-      img: "https://placehold.co/60x60/purple/white?text=Shop",
-    ),
-  ];
-
+  bool _isLoading = true;
+  List<Shop> _allShops = [];
   List<Shop> _filteredShops = [];
   final TextEditingController _searchController = TextEditingController();
 
@@ -80,14 +55,34 @@ class _RestaurantAdminDashboardScreenState
   @override
   void initState() {
     super.initState();
-    _filteredShops = _allShops;
+    _fetchShopsData();
     _searchController.addListener(_filterShops);
+  }
+
+  Future<void> _fetchShopsData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final fetchedData = await _apiService.fetchAdminShopMenus();
+      setState(() {
+        _allShops = fetchedData.map((json) => Shop.fromJson(json)).toList();
+        _filteredShops = _allShops;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _exchangeController.dispose();
     super.dispose();
   }
 
@@ -95,44 +90,36 @@ class _RestaurantAdminDashboardScreenState
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredShops = _allShops.where((shop) {
-        return shop.name.toLowerCase().contains(query);
+        return (shop.shopName ?? '').toLowerCase().contains(query);
       }).toList();
     });
-  }
-
-  void _handleProfileTap() {
-    print("Profile tapped");
-  }
-
-  void _handleDeleteShopTap() {
-    print("Delete Shop tapped");
-  }
-
-  void _handleLogoutTap() {
-    print("Logout tapped");
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        resizeToAvoidBottomInset: false,
         appBar: _currentIndex == 0 ? _buildCustomAppBar() : null,
-        body: Stack(
-          children: [
-            Positioned.fill(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _getSelectedScreen(),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+            : Stack(
+                children: [
+                  Positioned.fill(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _getSelectedScreen(),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: _buildBottomNavBar(),
+                  ),
+                ],
               ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: _buildBottomNavBar(),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -140,154 +127,155 @@ class _RestaurantAdminDashboardScreenState
   PreferredSizeWidget _buildCustomAppBar() {
     return PreferredSize(
       preferredSize: const Size.fromHeight(70.0),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Left: Logo & Title / Subtitle (Wrapped in Expanded to fix overflow)
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Container(
-                            color: Colors.white,
-                            child: const Icon(
-                              Icons.restaurant_menu,
-                              color: Color(0xFF0D9488),
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'ကျောင်းသားရေးရာဌာန',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0F172A),
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'စီမံခန့်ခွဲရေးဝန်ထမ်း',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF0D9488),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Right: Notification & Logout Buttons
-              Row(
-                children: [
-                  Stack(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(24),
+            bottomRight: Radius.circular(24),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          flexibleSpace: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
                     children: [
                       Container(
-                        width: 42,
-                        height: 42,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: const Color(0xFFF0FDFA),
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.notifications_outlined,
-                            size: 20,
-                            color: Color(0xFF334155),
+                          border: Border.all(
+                            color: const Color(0xFF99F6E4),
+                            width: 1,
                           ),
-                          onPressed: () {},
-                          padding: EdgeInsets.zero,
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.restaurant_menu_rounded,
+                            color: Color(0xFF0D9488),
+                            size: 24,
+                          ),
                         ),
                       ),
-                      Positioned(
-                        right: 10,
-                        top: 10,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Text(
+                              'ကျောင်းသားရေးရာဌာန',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'စီမံခန့်ခွဲရေးဝန်ထမ်း',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF0D9488),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
+                ),
+                const SizedBox(width: 8),
+                Row(
+                  children: [
+                    Stack(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFFBFDBFE),
+                              width: 1,
+                            ),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.notifications_rounded,
+                              size: 20,
+                              color: Color(0xFF2563EB),
+                            ),
+                            onPressed: () {},
+                            padding: EdgeInsets.zero,
+                          ),
+                        ),
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 1),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.logout,
-                        size: 20,
-                        color: Color(0xFFDC2626),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFFECACA),
+                          width: 1,
+                        ),
                       ),
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.logout_rounded,
+                          size: 20,
+                          color: Color(0xFFDC2626),
+                        ),
+                        onPressed: () {},
+                        padding: EdgeInsets.zero,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -304,6 +292,7 @@ class _RestaurantAdminDashboardScreenState
         );
       case 1:
         return TransferView(
+          // ပွိုင့်ဖြည့် (Top-up / Transfer)
           onBackButtonPressed: () {
             setState(() {
               _currentIndex = 0;
@@ -318,11 +307,22 @@ class _RestaurantAdminDashboardScreenState
           filteredTransfers: filteredTransfers,
         );
       case 2:
-        return _buildPlaceholderView("စကန်ဖတ်ရန် (QR Scan)");
+        return QrScanView(
+          onUserScanned: (scannedData) {
+            setState(() {
+              _currentIndex = 1;
+            });
+          },
+        );
       case 3:
-        return HistoryView();
+        return WithdrawView(
+          onBackButtonPressed: () {},
+          selectedCategory: '',
+          onCategorySelected: (String p1) {},
+          filteredHistory: [],
+        );
       case 4:
-        return SettingsView();
+        return HistoryView(); // မှတ်တမ်း
       default:
         return ShopListView(
           searchController: _searchController,
@@ -332,21 +332,7 @@ class _RestaurantAdminDashboardScreenState
     }
   }
 
-  Widget _buildPlaceholderView(String title) {
-    return Container(
-      color: const Color(0xFFF1F5F9),
-      child: Center(
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0D9488),
-          ),
-        ),
-      ),
-    );
-  }
+  // ✨ ပွိုင့်မှ ပိုက်ဆံထုတ်ယူခြင်း (Withdraw Point UI) နမူနာ
 
   Widget _buildShopCard(Shop shop) {
     return Container(
@@ -363,15 +349,29 @@ class _RestaurantAdminDashboardScreenState
         children: [
           Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: Image.network(
-                  shop.img,
-                  width: 56,
-                  height: 56,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image, size: 56),
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Center(
+                  child: Text(
+                    (shop.shopName != null && shop.shopName!.isNotEmpty)
+                        ? shop.shopName!.substring(
+                            0,
+                            shop.shopName!.length >= 3
+                                ? 3
+                                : shop.shopName!.length,
+                          )
+                        : 'SMT',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12.0),
@@ -380,14 +380,14 @@ class _RestaurantAdminDashboardScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      shop.name,
+                      shop.shopName ?? '',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF0F172A),
                       ),
                     ),
                     Text(
-                      'ID: ${shop.id}',
+                      'SHOP_ID: ${shop.shopId}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF64748B),
@@ -402,17 +402,17 @@ class _RestaurantAdminDashboardScreenState
                   vertical: 4.0,
                 ),
                 decoration: BoxDecoration(
-                  color: shop.status == 'open'
+                  color: shop.isOpen == 1
                       ? const Color(0xFFD1FAE5)
                       : const Color(0xFFFFE4E6),
                   borderRadius: BorderRadius.circular(9999.0),
                 ),
                 child: Text(
-                  shop.status == 'open' ? 'OPEN' : 'CLOSED',
+                  shop.isOpen == 1 ? 'OPEN' : 'CLOSED',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: shop.status == 'open'
+                    color: shop.isOpen == 1
                         ? Colors.teal
                         : const Color(0xFFDC2626),
                   ),
@@ -427,7 +427,7 @@ class _RestaurantAdminDashboardScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${shop.owner} (ပိုင်ရှင်)',
+                '${shop.userName ?? ''} (ပိုင်ရှင်)',
                 style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF475569),
@@ -450,6 +450,7 @@ class _RestaurantAdminDashboardScreenState
     );
   }
 
+  // ✨ Bottom Nav Bar ကို အစဉ်လိုက်ပြင်ဆင်ပြီး ပရိုဖိုင်ဖြုတ်ထားသည် (ဆိုင်များ၊ ပွိုင့်ဖြည့်၊ ငွေထုတ်၊ မှတ်တမ်း)
   Widget _buildBottomNavBar() {
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
@@ -477,16 +478,20 @@ class _RestaurantAdminDashboardScreenState
                 Expanded(child: _buildNavBarItem(Icons.store, 'ဆိုင်များ', 0)),
                 Expanded(
                   child: _buildNavBarItem(
-                    Icons.compare_arrows,
-                    'လွှဲပြောင်း',
+                    Icons.compare_arrows_rounded,
+                    'ပွိုင့်ဖြည့်',
                     1,
                   ),
                 ),
-                const SizedBox(width: 55),
-                Expanded(child: _buildNavBarItem(Icons.history, 'မှတ်တမ်း', 3)),
+                const SizedBox(width: 55), // Floating QR Button အတွက် နေရာလွတ်
                 Expanded(
-                  child: _buildNavBarItem(Icons.settings, 'ဆက်တင်များ', 4),
+                  child: _buildNavBarItem(
+                    Icons.account_balance_wallet,
+                    'ငွေထုတ်',
+                    3,
+                  ),
                 ),
+                Expanded(child: _buildNavBarItem(Icons.history, 'မှတ်တမ်း', 4)),
               ],
             ),
           ),
