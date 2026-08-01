@@ -6,6 +6,7 @@ class TransferView extends StatefulWidget {
   final String selectedTransferCategory;
   final Function(String) onCategorySelected;
   final List<Map<String, dynamic>> filteredTransfers;
+  final String? initialPhone;
 
   const TransferView({
     super.key,
@@ -13,6 +14,7 @@ class TransferView extends StatefulWidget {
     required this.selectedTransferCategory,
     required this.onCategorySelected,
     required this.filteredTransfers,
+    this.initialPhone,
   });
 
   @override
@@ -42,6 +44,9 @@ class _TransferViewState extends State<TransferView> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialPhone != null && widget.initialPhone!.isNotEmpty) {
+      _phoneController.text = widget.initialPhone!;
+    }
     _fetchTransferHistory();
   }
 
@@ -486,7 +491,7 @@ class _TransferViewState extends State<TransferView> {
                             ),
                           ),
                           subtitle: Text(
-                            "Role: $roleName | $date",
+                            " $date",
                             style: const TextStyle(
                               color: Color(0xFF64748B),
                               fontSize: 11,
@@ -549,7 +554,7 @@ class _TransferViewState extends State<TransferView> {
           ),
           const SizedBox(height: 8),
           Text(
-            "Transferring \$${_amountController.text} to +95 ${_phoneController.text}",
+            "Transferring point ${_amountController.text} to ${_phoneController.text}",
             textAlign: TextAlign.center,
             style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
           ),

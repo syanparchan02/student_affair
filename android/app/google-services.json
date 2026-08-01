@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "744172179776",
+    "project_id": "smart-canteen-73a77",
+    "storage_bucket": "smart-canteen-73a77.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744172179776:android:842862ed27a106b7d6aaa5",
+        "android_client_info": {
+          "package_name": "com.example.smart_canteen_noti"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW_dDNeOHg5iyvKXF4OSW_ToMjFWY7oHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744172179776:android:839c2ee72cc4b931d6aaa5",
+        "android_client_info": {
+          "package_name": "com.ucstt.smartcanteenshop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW_dDNeOHg5iyvKXF4OSW_ToMjFWY7oHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744172179776:android:e8997d0874233561d6aaa5",
+        "android_client_info": {
+          "package_name": "com.ucstt.smartcanteenstudentaffair"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW_dDNeOHg5iyvKXF4OSW_ToMjFWY7oHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744172179776:android:ba346cd85d8d217cd6aaa5",
+        "android_client_info": {
+          "package_name": "com.ucstt.smartcanteenuser"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW_dDNeOHg5iyvKXF4OSW_ToMjFWY7oHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

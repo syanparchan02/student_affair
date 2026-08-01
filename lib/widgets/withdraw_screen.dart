@@ -6,6 +6,7 @@ class WithdrawView extends StatefulWidget {
   final String selectedCategory;
   final Function(String) onCategorySelected;
   final List<Map<String, dynamic>> filteredHistory;
+  final String? initialPhone;
 
   const WithdrawView({
     super.key,
@@ -13,6 +14,7 @@ class WithdrawView extends StatefulWidget {
     required this.selectedCategory,
     required this.onCategorySelected,
     required this.filteredHistory,
+    this.initialPhone,
   });
 
   @override
@@ -34,14 +36,16 @@ class _WithdrawViewState extends State<WithdrawView> {
   bool _isLoading = false;
   bool _isHistoryLoading = false;
 
-  final double _conversionRate =
-      0.8; // ၁၀ ပွိုင့်လျှင် ၈ ကျပ် (1 Point = 0.8 Kyats)
+  final double _conversionRate = 0.99;
   double _calculatedCash = 0.0;
 
   @override
   void initState() {
     super.initState();
     _amountController.addListener(_calculateCashAmount);
+    if (widget.initialPhone != null && widget.initialPhone!.isNotEmpty) {
+      _phoneController.text = widget.initialPhone!;
+    }
   }
 
   void _calculateCashAmount() {
@@ -186,7 +190,6 @@ class _WithdrawViewState extends State<WithdrawView> {
     );
   }
 
-  // Step 0: Phone Number, Amount & Calculation Preview
   Widget _buildWithdrawInputView() {
     return Column(
       children: [
@@ -293,7 +296,7 @@ class _WithdrawViewState extends State<WithdrawView> {
               ),
               const SizedBox(height: 16),
 
-              // Calculated Cash Box (10 Points = 8 Kyats)
+              // Calculated Cash Box
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -339,7 +342,7 @@ class _WithdrawViewState extends State<WithdrawView> {
                     } else {
                       _showCustomSnackBar(
                         message:
-                            "ကျေးဇူးပြု၍ ဖုန်းနံပါတ်နှင့် ပွိုင့်ပမာဏကို ဖြည့်ပါ။",
+                            "ကျေးဇူးပြု၍ဖုန်းနံပါတ်နှင့်ပွိုင့်ပမာဏကိုဖြည့်ပါ။",
                         icon: Icons.error_outline_rounded,
                         backgroundColor: const Color(0xFFEF4444),
                       );
@@ -369,7 +372,6 @@ class _WithdrawViewState extends State<WithdrawView> {
     );
   }
 
-  // Step 1: PIN Verification (6 Digits Individual Boxes) & Confirm Button
   // Step 1: PIN Verification (6 Digits Individual Boxes) & Confirm Button
   Widget _buildPinVerificationView() {
     return Container(
@@ -481,7 +483,7 @@ class _WithdrawViewState extends State<WithdrawView> {
 
                           // ApiService ကိုခေါ်ဆိုခြင်း
                           await ApiService().exchangePoint(
-                            shopId: 4, // လိုအပ်သော shop_id ထည့်ရန်
+                            shopId: 3, // လိုအပ်သော shop_id ထည့်ရန်
                             phone: _phoneController.text.trim(),
                             amount: amountVal,
                             pin: fullPin,

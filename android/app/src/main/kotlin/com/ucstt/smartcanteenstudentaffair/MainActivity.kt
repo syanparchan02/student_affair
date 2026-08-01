@@ -1,4 +1,4 @@
-package com.example.student_affair
+package com.ucstt.smartcanteenstudentaffair
 
 import io.flutter.embedding.android.FlutterActivity
 

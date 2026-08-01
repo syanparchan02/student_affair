@@ -6,7 +6,7 @@ import 'package:student_affair/service/api_service.dart';
 import 'package:student_affair/widgets/withdraw_screen.dart';
 
 import '../widgets/shop_list_screen.dart';
-import '../widgets/transfer_screen.dart';
+import '../widgets/top_up_screen.dart';
 import '../widgets/setting_screen.dart';
 import '../widgets/history_screen.dart';
 
@@ -24,6 +24,7 @@ class _RestaurantAdminDashboardScreenState
 
   int _currentIndex = 0;
   String _selectedTransferCategory = "All";
+  String? _scannedPhone;
 
   bool _isLoading = true;
   List<Shop> _allShops = [];
@@ -282,6 +283,68 @@ class _RestaurantAdminDashboardScreenState
     );
   }
 
+  // Widget _getSelectedScreen() {
+  //   switch (_currentIndex) {
+  //     case 0:
+  //       return ShopListView(
+  //         searchController: _searchController,
+  //         filteredShops: _filteredShops,
+  //         buildShopCard: _buildShopCard,
+  //       );
+  //     case 1:
+  //       return TransferView(
+  //         onBackButtonPressed: () {
+  //           setState(() {
+  //             _currentIndex = 0;
+  //           });
+  //         },
+  //         selectedTransferCategory: _selectedTransferCategory,
+  //         onCategorySelected: (category) {
+  //           setState(() {
+  //             _selectedTransferCategory = category;
+  //           });
+  //         },
+  //         filteredTransfers: filteredTransfers,
+  //       );
+
+  //     case 2:
+  //       return QrScanView(
+  //         onUserScanned: (scannedData) {
+  //           setState(() {
+  //             _currentIndex = 1;
+  //           });
+  //         },
+  //         onNavigateWithPhone: (phone, mode) {
+  //           print("📱 Navigating with Phone: $phone, Mode: $mode");
+
+  //           if (mode == 'topup') {
+  //             setState(() {
+  //               _currentIndex = 1;
+  //             });
+  //           } else if (mode == 'withdraw') {
+  //             setState(() {
+  //               _currentIndex = 3;
+  //             });
+  //           }
+  //         },
+  //       );
+  //     case 3:
+  //       return WithdrawView(
+  //         onBackButtonPressed: () {},
+  //         selectedCategory: '',
+  //         onCategorySelected: (String p1) {},
+  //         filteredHistory: [],
+  //       );
+  //     case 4:
+  //       return HistoryView();
+  //     default:
+  //       return ShopListView(
+  //         searchController: _searchController,
+  //         filteredShops: _filteredShops,
+  //         buildShopCard: _buildShopCard,
+  //       );
+  //   }
+  // }
   Widget _getSelectedScreen() {
     switch (_currentIndex) {
       case 0:
@@ -290,9 +353,9 @@ class _RestaurantAdminDashboardScreenState
           filteredShops: _filteredShops,
           buildShopCard: _buildShopCard,
         );
+
       case 1:
         return TransferView(
-          // ပွိုင့်ဖြည့် (Top-up / Transfer)
           onBackButtonPressed: () {
             setState(() {
               _currentIndex = 0;
@@ -305,7 +368,9 @@ class _RestaurantAdminDashboardScreenState
             });
           },
           filteredTransfers: filteredTransfers,
+          initialPhone: _scannedPhone, // ✅ scanned phone ကိုထည့်
         );
+
       case 2:
         return QrScanView(
           onUserScanned: (scannedData) {
@@ -313,16 +378,42 @@ class _RestaurantAdminDashboardScreenState
               _currentIndex = 1;
             });
           },
+          onNavigateWithPhone: (phone, mode) {
+            print("📱 Navigating with Phone: $phone, Mode: $mode");
+
+            // ✅ scanned phone ကိုသိမ်းထား
+            setState(() {
+              _scannedPhone = phone;
+            });
+
+            if (mode == 'topup') {
+              setState(() {
+                _currentIndex = 1;
+              });
+            } else if (mode == 'withdraw') {
+              setState(() {
+                _currentIndex = 3;
+              });
+            }
+          },
         );
+
       case 3:
         return WithdrawView(
-          onBackButtonPressed: () {},
+          onBackButtonPressed: () {
+            setState(() {
+              _currentIndex = 0;
+            });
+          },
           selectedCategory: '',
           onCategorySelected: (String p1) {},
           filteredHistory: [],
+          initialPhone: _scannedPhone, // ✅ scanned phone ကိုထည့်
         );
+
       case 4:
-        return HistoryView(); // မှတ်တမ်း
+        return HistoryView();
+
       default:
         return ShopListView(
           searchController: _searchController,

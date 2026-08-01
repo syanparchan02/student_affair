@@ -1,4 +1,3 @@
-// screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_affair/providers/auth_provider.dart';
@@ -28,18 +27,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
     super.dispose();
   }
 
-  // Login ခေါ်မည့် Function
   void _handleLogin() async {
     final success = await ref
         .read(authProvider.notifier)
         .login(_emailController.text.trim(), _passwordController.text.trim());
-
-    // if (success && mounted) {
-    //   Navigator.pushReplacement(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => const HomeScreen()),
-    //   );
-    // }
 
     if (success && mounted) {
       Navigator.pushReplacement(
@@ -53,7 +44,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    // Auth State ကို ယူသုံးခြင်း (Error နဲ့ Loading အတွက်)
     final authState = ref.watch(authProvider);
 
     return Scaffold(

@@ -183,4 +183,41 @@ class ApiService {
       throw e.response?.data['message'] ?? 'ပွိုင့်လဲလှယ်ခြင်း မအောင်မြင်ပါ။';
     }
   }
+
+  // Future<Map<String, dynamic>> getUserInfoByQr(String scannedData) async {
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final token = prefs.getString('token') ?? '';
+
+  //     final response = await _dio.get(
+  //       '${ApiEndpoints.userInfoByQr}$scannedData',
+  //       options: Options(headers: {'Authorization': 'Bearer $token'}),
+  //     );
+  //     return response.data;
+  //   } on DioException catch (e) {
+  //     throw e.response?.data['message'] ?? 'အသုံးပြုသူ အချက်အလက် ရယူ၍မရပါ။';
+  //   }
+  // }
+  // api_service.dart ထဲက getUserInfoByQr ကို အောက်ပါအတိုင်းပြောင်းပါ
+
+  Future<Map<String, dynamic>> getUserInfoByQr(String scannedData) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      // URL encoding လုပ်ပါ (space နဲ့ special characters တွေအတွက်)
+      final encodedData = Uri.encodeComponent(scannedData);
+      print("Encoded Data: '$encodedData'");
+
+      final response = await _dio.get(
+        '${ApiEndpoints.userInfoByQr}$encodedData',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      print("DioException: ${e.message}");
+      print("Response Data: ${e.response?.data}");
+      throw e.response?.data['message'] ?? 'အသုံးပြုသူ အချက်အလက် ရယူ၍မရပါ။';
+    }
+  }
 }
