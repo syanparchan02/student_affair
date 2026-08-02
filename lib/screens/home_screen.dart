@@ -7,7 +7,6 @@ import 'package:student_affair/widgets/withdraw_screen.dart';
 
 import '../widgets/shop_list_screen.dart';
 import '../widgets/top_up_screen.dart';
-import '../widgets/setting_screen.dart';
 import '../widgets/history_screen.dart';
 
 class RestaurantAdminDashboardScreen extends StatefulWidget {
@@ -283,68 +282,6 @@ class _RestaurantAdminDashboardScreenState
     );
   }
 
-  // Widget _getSelectedScreen() {
-  //   switch (_currentIndex) {
-  //     case 0:
-  //       return ShopListView(
-  //         searchController: _searchController,
-  //         filteredShops: _filteredShops,
-  //         buildShopCard: _buildShopCard,
-  //       );
-  //     case 1:
-  //       return TransferView(
-  //         onBackButtonPressed: () {
-  //           setState(() {
-  //             _currentIndex = 0;
-  //           });
-  //         },
-  //         selectedTransferCategory: _selectedTransferCategory,
-  //         onCategorySelected: (category) {
-  //           setState(() {
-  //             _selectedTransferCategory = category;
-  //           });
-  //         },
-  //         filteredTransfers: filteredTransfers,
-  //       );
-
-  //     case 2:
-  //       return QrScanView(
-  //         onUserScanned: (scannedData) {
-  //           setState(() {
-  //             _currentIndex = 1;
-  //           });
-  //         },
-  //         onNavigateWithPhone: (phone, mode) {
-  //           print("📱 Navigating with Phone: $phone, Mode: $mode");
-
-  //           if (mode == 'topup') {
-  //             setState(() {
-  //               _currentIndex = 1;
-  //             });
-  //           } else if (mode == 'withdraw') {
-  //             setState(() {
-  //               _currentIndex = 3;
-  //             });
-  //           }
-  //         },
-  //       );
-  //     case 3:
-  //       return WithdrawView(
-  //         onBackButtonPressed: () {},
-  //         selectedCategory: '',
-  //         onCategorySelected: (String p1) {},
-  //         filteredHistory: [],
-  //       );
-  //     case 4:
-  //       return HistoryView();
-  //     default:
-  //       return ShopListView(
-  //         searchController: _searchController,
-  //         filteredShops: _filteredShops,
-  //         buildShopCard: _buildShopCard,
-  //       );
-  //   }
-  // }
   Widget _getSelectedScreen() {
     switch (_currentIndex) {
       case 0:
@@ -368,7 +305,7 @@ class _RestaurantAdminDashboardScreenState
             });
           },
           filteredTransfers: filteredTransfers,
-          initialPhone: _scannedPhone, // ✅ scanned phone ကိုထည့်
+          initialPhone: _scannedPhone,
         );
 
       case 2:
@@ -381,7 +318,6 @@ class _RestaurantAdminDashboardScreenState
           onNavigateWithPhone: (phone, mode) {
             print("📱 Navigating with Phone: $phone, Mode: $mode");
 
-            // ✅ scanned phone ကိုသိမ်းထား
             setState(() {
               _scannedPhone = phone;
             });
@@ -408,11 +344,11 @@ class _RestaurantAdminDashboardScreenState
           selectedCategory: '',
           onCategorySelected: (String p1) {},
           filteredHistory: [],
-          initialPhone: _scannedPhone, // ✅ scanned phone ကိုထည့်
+          initialPhone: _scannedPhone,
         );
 
       case 4:
-        return HistoryView();
+        return HistoryScreen();
 
       default:
         return ShopListView(
@@ -422,8 +358,6 @@ class _RestaurantAdminDashboardScreenState
         );
     }
   }
-
-  // ✨ ပွိုင့်မှ ပိုက်ဆံထုတ်ယူခြင်း (Withdraw Point UI) နမူနာ
 
   Widget _buildShopCard(Shop shop) {
     return Container(
@@ -541,7 +475,6 @@ class _RestaurantAdminDashboardScreenState
     );
   }
 
-  // ✨ Bottom Nav Bar ကို အစဉ်လိုက်ပြင်ဆင်ပြီး ပရိုဖိုင်ဖြုတ်ထားသည် (ဆိုင်များ၊ ပွိုင့်ဖြည့်၊ ငွေထုတ်၊ မှတ်တမ်း)
   Widget _buildBottomNavBar() {
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
@@ -574,7 +507,7 @@ class _RestaurantAdminDashboardScreenState
                     1,
                   ),
                 ),
-                const SizedBox(width: 55), // Floating QR Button အတွက် နေရာလွတ်
+                const SizedBox(width: 55),
                 Expanded(
                   child: _buildNavBarItem(
                     Icons.account_balance_wallet,

@@ -1,6 +1,4 @@
-// providers/auth_provider.dart
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:student_affair/models/user_model.dart';
 import 'package:student_affair/service/api_service.dart';
@@ -20,7 +18,6 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(AuthState());
 
-  // providers/auth_provider.dart ထဲတွင်
   Future<bool> login(String email, String password) async {
     state = AuthState(isLoading: true);
     try {
@@ -29,7 +26,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (response['success'] == true) {
         var user = UserModel.fromJson(response['user']);
 
-        // Console တွင် အောင်မြင်ကြောင်း စစ်ဆေးရန် ဤနေရာတွင် ထည့်ပါ
         debugPrint("======================================");
         debugPrint("✅ LOGIN SUCCESSFUL!");
         debugPrint("Token: ${response['token']}");

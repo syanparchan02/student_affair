@@ -34,7 +34,6 @@ class _WithdrawViewState extends State<WithdrawView> {
   final List<FocusNode> _pinFocusNodes = List.generate(6, (_) => FocusNode());
 
   bool _isLoading = false;
-  bool _isHistoryLoading = false;
 
   final double _conversionRate = 0.99;
   double _calculatedCash = 0.0;
@@ -109,7 +108,6 @@ class _WithdrawViewState extends State<WithdrawView> {
       color: const Color(0xFFF8FAFC),
       child: Column(
         children: [
-          // App Header
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
             decoration: const BoxDecoration(
@@ -174,15 +172,25 @@ class _WithdrawViewState extends State<WithdrawView> {
             ),
           ),
 
-          // Body Content based on steps
+          // Body Content
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
-              child: _currentStep == 0
-                  ? _buildWithdrawInputView()
-                  : _currentStep == 1
-                  ? _buildPinVerificationView()
-                  : _buildSuccessView(),
+              child: Column(
+                children: [
+                  // Main Step Views
+                  _currentStep == 0
+                      ? _buildWithdrawInputView()
+                      : _currentStep == 1
+                      ? _buildPinVerificationView()
+                      : _buildSuccessView(),
+
+                  if (_currentStep == 0) ...[
+                    const SizedBox(height: 24),
+                    _buildRecentExchangeSection(),
+                  ],
+                ],
+              ),
             ),
           ),
         ],
@@ -194,12 +202,87 @@ class _WithdrawViewState extends State<WithdrawView> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.only(
-            left: 22,
-            top: 0,
-            right: 22,
-            bottom: 22,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0D9488).withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      backgroundColor: Colors.white24,
+                      child: Icon(Icons.analytics_rounded, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "ဒီနေ့ Exchange စုစုပေါင်း Percent",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            "Daily Total Earned",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "hello",
+                  style: const TextStyle(
+                    color: Color(0xFF0D9488),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 15),
+        Container(
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
@@ -214,9 +297,6 @@ class _WithdrawViewState extends State<WithdrawView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
-
-              // Phone Number Field
               const Text(
                 "လက်ခံမည့် ဖုန်းနံပါတ်",
                 style: TextStyle(
@@ -257,7 +337,6 @@ class _WithdrawViewState extends State<WithdrawView> {
               ),
               const SizedBox(height: 16),
 
-              // Amount Field (Points)
               const Text(
                 "ထုတ်ယူမည့် ပွိုင့်ပမာဏ (Points)",
                 style: TextStyle(
@@ -296,7 +375,6 @@ class _WithdrawViewState extends State<WithdrawView> {
               ),
               const SizedBox(height: 16),
 
-              // Calculated Cash Box
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -327,8 +405,6 @@ class _WithdrawViewState extends State<WithdrawView> {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Continue Button
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -372,7 +448,155 @@ class _WithdrawViewState extends State<WithdrawView> {
     );
   }
 
-  // Step 1: PIN Verification (6 Digits Individual Boxes) & Confirm Button
+  Widget _buildRecentExchangeSection() {
+    final displayHistory = widget.filteredHistory.isNotEmpty
+        ? widget.filteredHistory
+        : [
+            {
+              'phone': '09912345678',
+              'date': 'Today, 10:45 AM',
+              'amount': '500',
+              'percent': '1.5',
+            },
+            {
+              'phone': '09456789123',
+              'date': 'Today, 09:15 AM',
+              'amount': '1,000',
+              'percent': '2.0',
+            },
+            {
+              'phone': '09789123456',
+              'date': 'Yesterday, 04:30 PM',
+              'amount': '300',
+              'percent': '1.0',
+            },
+          ];
+
+    double totalTodayPercent = displayHistory.fold(0.0, (sum, item) {
+      return sum +
+          (double.tryParse(item['percent']?.toString() ?? '1.5') ?? 1.5);
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Recent Exchanges",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        ListView.separated(
+          itemCount: displayHistory.length > 5 ? 5 : displayHistory.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          separatorBuilder: (context, index) => const SizedBox(height: 10),
+          itemBuilder: (context, index) {
+            final historyItem = displayHistory[index];
+            return Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF64748B).withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0FDFA),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_outward_rounded,
+                          color: Color(0xFF0D9488),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            historyItem['phone'] ?? 'Phone Number',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            historyItem['date'] ?? 'Just now',
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "-${historyItem['amount'] ?? '0'} Pts",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFEF4444),
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0FDF4),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          "+${historyItem['percent'] ?? '1.5'}%",
+                          style: const TextStyle(
+                            color: Color(0xFF10B981),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildPinVerificationView() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -412,7 +636,6 @@ class _WithdrawViewState extends State<WithdrawView> {
           ),
           const SizedBox(height: 30),
 
-          // 6-Digit Individual Pinput Boxes
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(6, (index) {
@@ -459,8 +682,6 @@ class _WithdrawViewState extends State<WithdrawView> {
             }),
           ),
           const SizedBox(height: 30),
-
-          // Confirm Withdraw Button (API ချိတ်ဆက်ထားသည်)
           SizedBox(
             width: double.infinity,
             height: 52,
@@ -480,10 +701,8 @@ class _WithdrawViewState extends State<WithdrawView> {
                         try {
                           double amountVal =
                               double.tryParse(_amountController.text) ?? 0.0;
-
-                          // ApiService ကိုခေါ်ဆိုခြင်း
                           await ApiService().exchangePoint(
-                            shopId: 3, // လိုအပ်သော shop_id ထည့်ရန်
+                            shopId: 3,
                             phone: _phoneController.text.trim(),
                             amount: amountVal,
                             pin: fullPin,
@@ -491,7 +710,7 @@ class _WithdrawViewState extends State<WithdrawView> {
 
                           setState(() {
                             _isLoading = false;
-                            _currentStep = 2; // အောင်မြင်သော Step သို့သွားမည်
+                            _currentStep = 2;
                           });
 
                           _showCustomSnackBar(
@@ -504,7 +723,6 @@ class _WithdrawViewState extends State<WithdrawView> {
                             _isLoading = false;
                           });
 
-                          // API Error ပြရန်
                           _showCustomSnackBar(
                             message: e.toString(),
                             icon: Icons.error_outline_rounded,
@@ -551,7 +769,6 @@ class _WithdrawViewState extends State<WithdrawView> {
     );
   }
 
-  // Step 2: Success Screen
   Widget _buildSuccessView() {
     return Container(
       padding: const EdgeInsets.all(30),

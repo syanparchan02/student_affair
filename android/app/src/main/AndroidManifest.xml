@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
  <uses-permission android:name="android.permission.INTERNET" />
  <uses-permission android:name="android.permission.CAMERA" />
+   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- 🔥 Wake Lock for Notifications -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    
     <application
     
         android:label="student_affair"
@@ -31,6 +36,13 @@
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+
+              <!-- 🔥 Firebase Messaging Default Channel -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="topup_channel" />
+        
+       
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

@@ -6,25 +6,25 @@ part 'shop_model.g.dart';
 class ShopItem {
   @JsonKey(name: 'menu_id')
   final int menuId;
-  
+
   @JsonKey(name: 'item_name')
   final String? itemName;
-  
+
   @JsonKey(name: 'description')
   final String? description;
-  
+
   @JsonKey(name: 'item_price', fromJson: _toDouble)
   final double itemPrice;
-  
+
   @JsonKey(name: 'quantity')
   final int quantity;
-  
+
   @JsonKey(name: 'is_available')
   final int isAvailable;
-  
+
   @JsonKey(name: 'category_id')
   final int categoryId;
-  
+
   @JsonKey(name: 'category_name')
   final String? categoryName;
 
@@ -44,7 +44,8 @@ class ShopItem {
     return double.tryParse(value.toString()) ?? 0.0;
   }
 
-  factory ShopItem.fromJson(Map<String, dynamic> json) => _$ShopItemFromJson(json);
+  factory ShopItem.fromJson(Map<String, dynamic> json) =>
+      _$ShopItemFromJson(json);
   Map<String, dynamic> toJson() => _$ShopItemToJson(this);
 }
 
@@ -52,19 +53,19 @@ class ShopItem {
 class Shop {
   @JsonKey(name: 'shop_id')
   final int shopId;
-  
+
   @JsonKey(name: 'shop_name')
   final String? shopName;
-  
+
   @JsonKey(name: 'shop_phone')
   final String? shopPhone;
-  
+
   @JsonKey(name: 'is_open')
   final int isOpen;
-  
+
   @JsonKey(name: 'user_name')
   final String? userName;
-  
+
   @JsonKey(name: 'user_email')
   final String? userEmail;
 

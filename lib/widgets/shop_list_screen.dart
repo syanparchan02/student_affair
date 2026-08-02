@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:student_affair/models/shop_model.dart';
 import 'package:student_affair/screens/create_shop_screen.dart';
-import '../models/shop.dart';
 
 class ShopListView extends StatelessWidget {
   final TextEditingController searchController;
@@ -337,7 +336,6 @@ class _ShopDetailTabScreenState extends State<_ShopDetailTabScreen>
       vsync: this,
     );
 
-    // Swipe လုပ်နေစဉ် (သို့) Tab ပြောင်းနေစဉ် index မှန်ကန်စေရန် အမြဲ listen လုပ်မည်
     _tabController.addListener(() {
       if (mounted) {
         setState(() {});
@@ -550,7 +548,6 @@ class _ShopDetailTabScreenState extends State<_ShopDetailTabScreen>
                   children: _categoryNames.asMap().entries.map((entry) {
                     int index = entry.key;
                     String categoryName = entry.value;
-                    // index က ဘယ်လောက်လဲဆိုတာ တိုက်စစ်ပြီး အရောင်ပြောင်းရန်
                     final bool isSelected = _tabController.index == index;
 
                     return Padding(

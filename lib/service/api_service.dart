@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,8 +16,8 @@ class ApiService {
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
-        connectTimeout: const Duration(seconds: 60), // အချိန်ကို တိုးပေးပါ
-        receiveTimeout: const Duration(seconds: 60), // အချိန်ကို တိုးပေးပါ
+        connectTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 60),
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -27,17 +28,32 @@ class ApiService {
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
+      String? fcmToken;
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+        debugPrint('📱 FCM Token: $fcmToken');
+      } catch (e) {
+        debugPrint('⚠️ FCM Token ရယူရာမှာ အမှားရှိနေတယ်: $e');
+        fcmToken = null;
+      }
+
       final response = await _dio.post(
         ApiEndpoints.login,
-        data: {"user_email": email, "user_password": password},
+        data: {
+          "user_email": email,
+          "user_password": password,
+          "fcm_token": fcmToken,
+        },
       );
 
-      // ===== Login အောင်မြင်ပါက Token ကို SharedPreferences တွင် သိမ်းဆည်းမည် =====
       if (response.data != null && response.data['token'] != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', response.data['token']);
+
+        if (fcmToken != null) {
+          await prefs.setString('fcm_token', fcmToken);
+        }
       }
-      // =================================================================
 
       return response.data;
     } on DioException catch (e) {
@@ -62,10 +78,8 @@ class ApiService {
     required String walletPin,
   }) async {
     try {
-      // SharedPreferences မှ သိမ်းထားသော Token ကို ယူခြင်း
       final prefs = await SharedPreferences.getInstance();
-      final token =
-          prefs.getString('token') ?? ''; // Login ဝင်စဉ်က သိမ်းခဲ့သော Key
+      final token = prefs.getString('token') ?? '';
 
       final response = await _dio.post(
         ApiEndpoints.registerShop,
@@ -79,11 +93,7 @@ class ApiService {
           "user_phone": userPhone,
           "wallet_pin": walletPin,
         },
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token', // Header တွင် Token ထည့်ခြင်း
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       return response.data;
     } on DioException catch (e) {
@@ -95,15 +105,13 @@ class ApiService {
   Future<List<dynamic>> fetchAdminShopMenus() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token =
-          prefs.getString('token') ?? ''; // Login ဝင်စဉ်က သိမ်းခဲ့သော Key
+      final token = prefs.getString('token') ?? '';
 
       final response = await _dio.get(
         ApiEndpoints.adminShopMenus,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      // Server မှ Response ထွက်လာပုံပေါ်မူတည်၍ List ပြန်ရန်
       if (response.data is List) {
         return response.data;
       } else if (response.data['data'] is List) {
@@ -126,13 +134,9 @@ class ApiService {
       final token = prefs.getString('token') ?? '';
 
       final response = await _dio.post(
-        ApiEndpoints.topupbypone, // ApiEndpoints ထဲပါသည့် route ကို သုံးခြင်း
+        ApiEndpoints.topupbypone,
         data: {"phone": phone, "amount": amount, "pin": pin},
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token', // Token ထည့်ခြင်း[cite: 1]
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       return response.data;
     } on DioException catch (e) {
@@ -146,12 +150,10 @@ class ApiService {
       final token = prefs.getString('token') ?? '';
 
       final response = await _dio.get(
-        ApiEndpoints
-            .allHistory, // ApiEndpoints ထဲရှိ allhistory route ကိုသုံးခြင်း
+        ApiEndpoints.allHistory,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      // Server မှ Response ထွက်လာပုံပေါ်မူတည်၍ List ပြန်ရန်
       if (response.data is List) {
         return response.data;
       } else if (response.data['data'] is List) {
@@ -184,28 +186,10 @@ class ApiService {
     }
   }
 
-  // Future<Map<String, dynamic>> getUserInfoByQr(String scannedData) async {
-  //   try {
-  //     final prefs = await SharedPreferences.getInstance();
-  //     final token = prefs.getString('token') ?? '';
-
-  //     final response = await _dio.get(
-  //       '${ApiEndpoints.userInfoByQr}$scannedData',
-  //       options: Options(headers: {'Authorization': 'Bearer $token'}),
-  //     );
-  //     return response.data;
-  //   } on DioException catch (e) {
-  //     throw e.response?.data['message'] ?? 'အသုံးပြုသူ အချက်အလက် ရယူ၍မရပါ။';
-  //   }
-  // }
-  // api_service.dart ထဲက getUserInfoByQr ကို အောက်ပါအတိုင်းပြောင်းပါ
-
   Future<Map<String, dynamic>> getUserInfoByQr(String scannedData) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-
-      // URL encoding လုပ်ပါ (space နဲ့ special characters တွေအတွက်)
       final encodedData = Uri.encodeComponent(scannedData);
       print("Encoded Data: '$encodedData'");
 

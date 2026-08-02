@@ -1,8 +1,8 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_affair/providers/auth_provider.dart';
 import 'package:student_affair/screens/home_screen.dart';
-import 'package:student_affair/test.dart';
 
 class LoginView extends ConsumerStatefulWidget {
   const LoginView({super.key});
@@ -33,6 +33,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
         .login(_emailController.text.trim(), _passwordController.text.trim());
 
     if (success && mounted) {
+      String? token = await FirebaseMessaging.instance.getToken();
+      print('📱 FCM Token: $token');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -86,8 +88,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   ),
                 ),
                 const SizedBox(height: 40),
-
-                // Email Field (မူလ UI အလှအတိုင်း)
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -126,8 +126,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Password Field (မူလ UI အလှအတိုင်း)
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -184,7 +182,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
                 ),
                 const SizedBox(height: 16),
 
-                // Error Message (API ကနေ Error ပြန်လာမှ ပေါ်မည်)
                 if (authState.errorMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -216,7 +213,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   const SizedBox(height: 16),
                 ],
 
-                // Login Button (Loading နေရင် CircularProgressIndicator ပြမည်)
                 SizedBox(
                   width: double.infinity,
                   height: 54,

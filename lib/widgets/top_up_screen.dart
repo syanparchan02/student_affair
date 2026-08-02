@@ -27,17 +27,14 @@ class _TransferViewState extends State<TransferView> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
 
-  // ၆ လုံးအတွက် Controllers များနှင့် FocusNodes များ (Pinput ပုံစံအတွက်)
   final List<TextEditingController> _pinControllers = List.generate(
     6,
     (_) => TextEditingController(),
   );
   final List<FocusNode> _pinFocusNodes = List.generate(6, (_) => FocusNode());
 
-  // API ခေါ်နေစဉ် Loading ဖြစ်နေသည်ကို ပြသရန် variable
   bool _isLoading = false;
 
-  // API မှ ရလာမည့် History ဒေတာများကို သိမ်းရန်
   bool _isHistoryLoading = true;
   List<Map<String, dynamic>> _apiTransfers = [];
 
@@ -50,7 +47,6 @@ class _TransferViewState extends State<TransferView> {
     _fetchTransferHistory();
   }
 
-  // API ဖြင့် Recent Transfers များကို လှမ်းခေါ်သည့် Method
   Future<void> _fetchTransferHistory() async {
     try {
       final data = await ApiService().getAllHistory();
@@ -70,7 +66,6 @@ class _TransferViewState extends State<TransferView> {
     }
   }
 
-  // SnackBar ကို လှပစေရန် helper method
   void _showCustomSnackBar({
     required String message,
     required IconData icon,
@@ -125,7 +120,6 @@ class _TransferViewState extends State<TransferView> {
       color: const Color(0xFFF8FAFC),
       child: Column(
         children: [
-          // App Header
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
             decoration: const BoxDecoration(
@@ -190,7 +184,6 @@ class _TransferViewState extends State<TransferView> {
             ),
           ),
 
-          // Body Content based on steps
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
@@ -206,7 +199,6 @@ class _TransferViewState extends State<TransferView> {
     );
   }
 
-  // Step 0: Phone Number, Amount & Recent Transfers
   Widget _buildTransferInputView() {
     List<Map<String, dynamic>> displayedTransfers = _apiTransfers.where((
       transfer,
@@ -224,6 +216,86 @@ class _TransferViewState extends State<TransferView> {
 
     return Column(
       children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0D9488).withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      backgroundColor: Colors.white24,
+                      child: Icon(Icons.analytics_rounded, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "ဒီနေ့ Exchange စုစုပေါင်း Percent",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            "Daily Total Earned",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "hello",
+                  style: const TextStyle(
+                    color: Color(0xFF0D9488),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 15),
         Container(
           padding: const EdgeInsets.only(
             left: 22,
@@ -247,7 +319,6 @@ class _TransferViewState extends State<TransferView> {
             children: [
               const SizedBox(height: 20),
 
-              // Phone Number Field
               const Text(
                 "Recipient Phone Number",
                 style: TextStyle(
@@ -288,7 +359,6 @@ class _TransferViewState extends State<TransferView> {
               ),
               const SizedBox(height: 16),
 
-              // Amount Field
               const Text(
                 "Transfer Amount Point",
                 style: TextStyle(
@@ -330,7 +400,6 @@ class _TransferViewState extends State<TransferView> {
               ),
               const SizedBox(height: 24),
 
-              // Continue Button
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -371,7 +440,6 @@ class _TransferViewState extends State<TransferView> {
         ),
         const SizedBox(height: 20),
 
-        // Recent Transfers Section
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
@@ -520,7 +588,6 @@ class _TransferViewState extends State<TransferView> {
     );
   }
 
-  // Step 1: PIN Verification (6 Digits Individual Boxes) & Confirm Transfer Button
   Widget _buildPinVerificationView() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -560,7 +627,6 @@ class _TransferViewState extends State<TransferView> {
           ),
           const SizedBox(height: 30),
 
-          // 6-Digit Individual Pinput Boxes (Logic မပြောင်းဘဲ ပုံစံအသစ်ဖြင့်)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(6, (index) {
@@ -608,7 +674,6 @@ class _TransferViewState extends State<TransferView> {
           ),
           const SizedBox(height: 30),
 
-          // Confirm Transfer Button
           SizedBox(
             width: double.infinity,
             height: 52,
@@ -616,7 +681,6 @@ class _TransferViewState extends State<TransferView> {
               onPressed: _isLoading
                   ? null
                   : () async {
-                      // controllers ခြောက်ခုမှ pin များကို ပေါင်းယူခြင်း
                       String fullPin = _pinControllers
                           .map((c) => c.text)
                           .join();
@@ -697,7 +761,6 @@ class _TransferViewState extends State<TransferView> {
     );
   }
 
-  // Step 2: Success Screen
   Widget _buildSuccessView() {
     return Container(
       padding: const EdgeInsets.all(30),
