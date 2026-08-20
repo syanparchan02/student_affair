@@ -28,6 +28,10 @@ class ShopItem {
   @JsonKey(name: 'category_name')
   final String? categoryName;
 
+   @JsonKey(name: 'item_image')
+  final String? itemImage;
+  
+
   ShopItem({
     required this.menuId,
     this.itemName,
@@ -37,6 +41,7 @@ class ShopItem {
     required this.isAvailable,
     required this.categoryId,
     this.categoryName,
+    required this.itemImage
   });
 
   static double _toDouble(dynamic value) {

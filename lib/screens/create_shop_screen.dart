@@ -272,14 +272,14 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                       height: 60,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                          colors: [Color(0xff0D6B80), Color(0xff0D6B80)],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF0D9488).withOpacity(0.3),
+                            color: Color(0xff0D6B80).withOpacity(0.3),
                             blurRadius: 15,
                             offset: const Offset(0, 5),
                           ),
@@ -446,7 +446,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                           ),
                                         ],
                                       ),
-                                      backgroundColor: Color(0xFF0D9488),
+                                      backgroundColor: Color(0xff0D6B80),
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.all(
@@ -517,10 +517,10 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: const Color(0xFF0D9488).withOpacity(0.1),
+                color: Color(0xff0D6B80).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: const Color(0xFF0D9488), size: 16),
+              child: Icon(icon, color: Color(0xff0D6B80), size: 16),
             ),
             const SizedBox(width: 10),
             Text(

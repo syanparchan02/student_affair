@@ -1,4 +1,5 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+// ❌ Remove this import
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_affair/providers/auth_provider.dart';
@@ -33,8 +34,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
         .login(_emailController.text.trim(), _passwordController.text.trim());
 
     if (success && mounted) {
-      String? token = await FirebaseMessaging.instance.getToken();
-      print('📱 FCM Token: $token');
+      // ❌ Remove FCM token code
+      // String? token = await FirebaseMessaging.instance.getToken();
+      // print('📱 FCM Token: $token');
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

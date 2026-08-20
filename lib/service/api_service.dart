@@ -45,7 +45,10 @@ class ApiService {
           "fcm_token": fcmToken,
         },
       );
-
+      debugPrint('📡 Full Response: ${response.data}');
+      debugPrint('📡 Token: ${response.data['token']}');
+      debugPrint('📡 Success: ${response.data['success']}');
+      debugPrint('📡 User: ${response.data['user']}');
       if (response.data != null && response.data['token'] != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', response.data['token']);
@@ -144,7 +147,27 @@ class ApiService {
     }
   }
 
-  Future<List<dynamic>> getAllHistory() async {
+  // Future<List<dynamic>> getAllHistory() async {
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final token = prefs.getString('token') ?? '';
+
+  //     final response = await _dio.get(
+  //       ApiEndpoints.allHistory,
+  //       options: Options(headers: {'Authorization': 'Bearer $token'}),
+  //     );
+
+  //     if (response.data is List) {
+  //       return response.data;
+  //     } else if (response.data['data'] is List) {
+  //       return response.data['data'];
+  //     }
+  //     return [];
+  //   } on DioException catch (e) {
+  //     throw e.response?.data['message'] ?? 'မှတ်တမ်းများကို ထုတ်ယူ၍မရပါ။';
+  //   }
+  // }
+  Future<Map<String, dynamic>> getAllHistory() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
@@ -154,12 +177,7 @@ class ApiService {
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      if (response.data is List) {
-        return response.data;
-      } else if (response.data['data'] is List) {
-        return response.data['data'];
-      }
-      return [];
+      return response.data;
     } on DioException catch (e) {
       throw e.response?.data['message'] ?? 'မှတ်တမ်းများကို ထုတ်ယူ၍မရပါ။';
     }
@@ -202,6 +220,129 @@ class ApiService {
       print("DioException: ${e.message}");
       print("Response Data: ${e.response?.data}");
       throw e.response?.data['message'] ?? 'အသုံးပြုသူ အချက်အလက် ရယူ၍မရပါ။';
+    }
+  }
+
+  Future<List<dynamic>> getRecentExchanges() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await _dio.get(
+        ApiEndpoints.recentExchanges,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (response.data is List) {
+        return response.data;
+      } else if (response.data['data'] is List) {
+        return response.data['data'];
+      }
+      return [];
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'မှတ်တမ်းများကို ထုတ်ယူ၍မရပါ။';
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      try {
+        await _dio.post(
+          ApiEndpoints.logout,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/json',
+            },
+          ),
+        );
+      } catch (_) {}
+
+      await prefs.remove('token');
+      await prefs.remove('fcm_token');
+    } catch (e) {
+      throw 'ထွက်ခွာရန် မအောင်မြင်ပါ။';
+    }
+  }
+
+  Future<Map<String, dynamic>> getExchangeSummary() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await _dio.get(
+        ApiEndpoints.exchangeSummary,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'အချက်အလက်များကို ထုတ်ယူ၍မရပါ။';
+    }
+  }
+
+  // Pending Exchanges တွေကို ဆွဲထုတ်မယ့် Method
+  Future<List<dynamic>> getPendingExchanges() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await _dio.get(
+        ApiEndpoints.pendingExchanges,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      // JSON structure အရ response.data['data']['data'] ကို ယူပါတယ်
+      if (response.data['success'] == true && response.data['data'] != null) {
+        return response.data['data']['data'] ?? [];
+      }
+      return [];
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'တောင်းဆိုမှုများကို ထုတ်ယူ၍မရပါ။';
+    }
+  }
+
+  // Payout Confirm လုပ်မည့် Method
+  Future<Map<String, dynamic>> confirmPayout(int transactionId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await _dio.post(
+        // သို့မဟုတ် Server ပေါ်မူတည်၍ .post သုံးပါ
+        '${ApiEndpoints.baseUrl}${ApiEndpoints.confirmPayout(transactionId)}',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'အတည်ပြုခြင်း မအောင်မြင်ပါ။';
+    }
+  }
+
+  Future<Map<String, dynamic>> getMonthlySummary() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await _dio.get(
+        ApiEndpoints.monthlySummary,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      debugPrint("Status: ${e.response?.statusCode}");
+      debugPrint("Error: ${e.response?.data}");
+
+      throw e.response?.data['message'] ?? 'Summary data ရယူ၍မရပါ။';
     }
   }
 }

@@ -142,12 +142,12 @@ class _QrScanViewState extends State<QrScanView>
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.teal.withOpacity(0.1),
+                  color: Color(0xff0D6B80).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.qr_code_scanner,
-                  color: Colors.teal,
+                  color: Color(0xff0D6B80),
                   size: 48.0,
                 ),
               ),
@@ -239,14 +239,14 @@ class _QrScanViewState extends State<QrScanView>
                         padding: const EdgeInsets.symmetric(vertical: 14.0),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Colors.teal, Colors.tealAccent],
+                            colors: [Color(0xff0D6B80), Color(0xff0D6B80)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(12.0),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.teal.withOpacity(0.3),
+                              color: Color(0xff0D6B80).withOpacity(0.3),
                               blurRadius: 8.0,
                               offset: const Offset(0, 4),
                             ),
@@ -324,7 +324,7 @@ class _QrScanViewState extends State<QrScanView>
           Container(color: Colors.black.withOpacity(0.55)),
           if (_isLoadingApi)
             const Center(
-              child: CircularProgressIndicator(color: Colors.tealAccent),
+              child: CircularProgressIndicator(color: Color(0xff0D6B80)),
             ),
           Center(
             child: SizedBox(
@@ -344,10 +344,10 @@ class _QrScanViewState extends State<QrScanView>
                           child: Container(
                             height: 3.0,
                             decoration: BoxDecoration(
-                              color: Colors.tealAccent,
+                              color: Color(0xff0D6B80),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Colors.tealAccent,
+                                  color: Color(0xff0D6B80),
                                   blurRadius: 15.0,
                                 ),
                               ],
@@ -426,14 +426,14 @@ class _QrScanViewState extends State<QrScanView>
                       children: [
                         Icon(
                           Icons.photo_library,
-                          color: Colors.teal,
+                          color: Color(0xff0D6B80),
                           size: 18.0,
                         ),
                         SizedBox(width: 8.0),
                         Text(
                           "Gallery",
                           style: TextStyle(
-                            color: Colors.teal,
+                            color: Color(0xff0D6B80),
                             fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                           ),
@@ -455,7 +455,7 @@ class ScannerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.tealAccent
+      ..color = Color(0xff0D6B80)
       ..strokeWidth = 5.0
       ..style = PaintingStyle.stroke;
 

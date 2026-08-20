@@ -15,6 +15,7 @@ ShopItem _$ShopItemFromJson(Map<String, dynamic> json) => ShopItem(
   isAvailable: (json['is_available'] as num).toInt(),
   categoryId: (json['category_id'] as num).toInt(),
   categoryName: json['category_name'] as String?,
+  itemImage: json['item_image'] as String?,
 );
 
 Map<String, dynamic> _$ShopItemToJson(ShopItem instance) => <String, dynamic>{

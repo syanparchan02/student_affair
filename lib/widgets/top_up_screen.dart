@@ -37,6 +37,7 @@ class _TransferViewState extends State<TransferView> {
 
   bool _isHistoryLoading = true;
   List<Map<String, dynamic>> _apiTransfers = [];
+  String _formattedTotalPoints = "0 pts";
 
   @override
   void initState() {
@@ -49,9 +50,15 @@ class _TransferViewState extends State<TransferView> {
 
   Future<void> _fetchTransferHistory() async {
     try {
-      final data = await ApiService().getAllHistory();
+      final response = await ApiService().getAllHistory();
+
+      final summary = response['summary'] ?? {};
+      final data = response['data'] ?? [];
+
       setState(() {
         _apiTransfers = List<Map<String, dynamic>>.from(data);
+        _formattedTotalPoints =
+            summary['formatted_total_points']?.toString() ?? "0 pts";
         _isHistoryLoading = false;
       });
     } catch (e) {
@@ -142,43 +149,16 @@ class _TransferViewState extends State<TransferView> {
                 Row(
                   children: [
                     if (_currentStep > 0)
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                        onPressed: () {
-                          setState(() {
-                            _currentStep--;
-                          });
-                        },
+                      const Text(
+                        "ပွိုင့်များဖြည့်ရန်",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
                       ),
-                    const Text(
-                      "Top Up Points",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A),
-                        letterSpacing: -0.5,
-                      ),
-                    ),
                   ],
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.history_rounded,
-                      color: Color(0xFF0D9488),
-                      size: 20,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
-                    ),
-                    padding: EdgeInsets.zero,
-                    onPressed: () {},
-                  ),
                 ),
               ],
             ),
@@ -220,14 +200,14 @@ class _TransferViewState extends State<TransferView> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+              colors: [Color(0xff0D6B80), Color(0xff0D6B80)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF0D9488).withOpacity(0.2),
+                color: Color(0xff0D6B80).withOpacity(0.2),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -249,7 +229,7 @@ class _TransferViewState extends State<TransferView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            "ဒီနေ့ Exchange စုစုပေါင်း Percent",
+                            "ဒီနေ့ပွိုင့်ဖြည့်",
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
@@ -259,7 +239,7 @@ class _TransferViewState extends State<TransferView> {
                           ),
                           const SizedBox(height: 2),
                           const Text(
-                            "Daily Total Earned",
+                            "စုစုပေါင်း",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -284,7 +264,7 @@ class _TransferViewState extends State<TransferView> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  "hello",
+                  _formattedTotalPoints,
                   style: const TextStyle(
                     color: Color(0xFF0D9488),
                     fontWeight: FontWeight.bold,
@@ -320,7 +300,7 @@ class _TransferViewState extends State<TransferView> {
               const SizedBox(height: 20),
 
               const Text(
-                "Recipient Phone Number",
+                "လက်ခံမည့်ဖုန်းနံပါတ်",
                 style: TextStyle(
                   fontSize: 13,
                   color: Color(0xFF64748B),
@@ -349,7 +329,7 @@ class _TransferViewState extends State<TransferView> {
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: const InputDecoration(
-                          hintText: "Enter phone number",
+                          hintText: "09xxxxxxx",
                           border: InputBorder.none,
                         ),
                       ),
@@ -360,7 +340,7 @@ class _TransferViewState extends State<TransferView> {
               const SizedBox(height: 16),
 
               const Text(
-                "Transfer Amount Point",
+                "ဖြည့်သွင်းမည့်ပွိုင့်ပမာဏ",
                 style: TextStyle(
                   fontSize: 13,
                   color: Color(0xFF64748B),
@@ -419,14 +399,14 @@ class _TransferViewState extends State<TransferView> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D9488),
+                    backgroundColor: Color(0xff0D6B80),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    "Continue",
+                    "ဆက်သွားမည်",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -457,9 +437,9 @@ class _TransferViewState extends State<TransferView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "Recent Transfers",
+                "လတ်တလောပွိုင့်ဖြည့်သွင်းထားမှုများ",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1E293B),
                 ),
@@ -479,7 +459,7 @@ class _TransferViewState extends State<TransferView> {
                         padding: const EdgeInsets.symmetric(vertical: 9),
                         decoration: BoxDecoration(
                           color: selected
-                              ? const Color(0xFF0D9488)
+                              ? Color(0xff0D6B80)
                               : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -505,7 +485,7 @@ class _TransferViewState extends State<TransferView> {
                       child: Padding(
                         padding: EdgeInsets.all(20.0),
                         child: CircularProgressIndicator(
-                          color: Color(0xFF0D9488),
+                          color: Color(0xff0D6B80),
                         ),
                       ),
                     )
@@ -533,8 +513,6 @@ class _TransferViewState extends State<TransferView> {
                         final transfer = displayedTransfers[index];
 
                         final name = transfer['user_name']?.toString() ?? '';
-                        final roleName =
-                            transfer['role_name']?.toString() ?? '';
                         final amount = transfer['amount']?.toString() ?? '';
                         final date = transfer['date']?.toString() ?? '';
                         final phone = transfer['user_phone']?.toString() ?? '';
@@ -546,7 +524,7 @@ class _TransferViewState extends State<TransferView> {
                             backgroundColor: Color(0xFFF1F5F9),
                             child: Icon(
                               Icons.person,
-                              color: Color(0xFF0D9488),
+                              color: Color(0xff0D6B80),
                               size: 20,
                             ),
                           ),
@@ -569,7 +547,7 @@ class _TransferViewState extends State<TransferView> {
                             amount,
                             style: TextStyle(
                               color: amount.contains('+')
-                                  ? const Color(0xFF0D9488)
+                                  ? Color(0xff0D6B80)
                                   : Colors.redAccent,
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -608,11 +586,11 @@ class _TransferViewState extends State<TransferView> {
           const Icon(
             Icons.lock_outline_rounded,
             size: 48,
-            color: Color(0xFF0D9488),
+            color: Color(0xff0D6B80),
           ),
           const SizedBox(height: 16),
           const Text(
-            "Enter Security PIN",
+            "Pinနံပါတ်ရိုက်ထည့်ပါ",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -656,7 +634,7 @@ class _TransferViewState extends State<TransferView> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: Color(0xFF0D9488),
+                        color: Color(0xff0D6B80),
                         width: 2,
                       ),
                     ),
@@ -731,7 +709,7 @@ class _TransferViewState extends State<TransferView> {
                       }
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0D9488),
+                backgroundColor: Color(0xff0D6B80),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -747,7 +725,7 @@ class _TransferViewState extends State<TransferView> {
                       ),
                     )
                   : const Text(
-                      "Confirm Transfer",
+                      "အတည်ပြုမည်",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -787,7 +765,7 @@ class _TransferViewState extends State<TransferView> {
             child: const Icon(
               Icons.check_circle_rounded,
               size: 60,
-              color: Color(0xFF10B981),
+              color: Color(0xff0D6B80),
             ),
           ),
           const SizedBox(height: 20),
@@ -822,7 +800,7 @@ class _TransferViewState extends State<TransferView> {
                 widget.onBackButtonPressed();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0D9488),
+                backgroundColor: Color(0xff0D6B80),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),

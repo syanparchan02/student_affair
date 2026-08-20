@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:student_affair/models/shop_model.dart';
 import 'package:student_affair/screens/QrScan_screen.dart';
+import 'package:student_affair/screens/login_screen.dart';
 import 'package:student_affair/service/api_service.dart';
 import 'package:student_affair/widgets/withdraw_screen.dart';
 
@@ -103,7 +105,9 @@ class _RestaurantAdminDashboardScreenState
         resizeToAvoidBottomInset: false,
         appBar: _currentIndex == 0 ? _buildCustomAppBar() : null,
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+            ? const Center(
+                child: CircularProgressIndicator(color: Color(0xff0D6B80)),
+              )
             : Stack(
                 children: [
                   Positioned.fill(
@@ -158,32 +162,21 @@ class _RestaurantAdminDashboardScreenState
                   child: Row(
                     children: [
                       Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF0FDFA),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFF99F6E4),
-                            width: 1,
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.restaurant_menu_rounded,
-                            color: Color(0xFF0D9488),
-                            size: 24,
-                          ),
+                        width: 60,
+                        height: 60,
+                        padding: const EdgeInsets.all(8),
+                        child: Image.asset(
+                          'assets/images/menu.jpg',
+                          fit: BoxFit.cover,
                         ),
                       ),
-                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
                             Text(
-                              'ကျောင်းသားရေးရာဌာန',
+                              'ကျောင်းသားရေးရာ',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -199,7 +192,7 @@ class _RestaurantAdminDashboardScreenState
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFF0D9488),
+                                color: Color(0xff0D6B80),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -268,7 +261,142 @@ class _RestaurantAdminDashboardScreenState
                           size: 20,
                           color: Color(0xFFDC2626),
                         ),
-                        onPressed: () {},
+                        onPressed: () async {
+                          bool? confirm = await showDialog<bool>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              contentPadding: const EdgeInsets.all(24),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFFEF2F2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.logout_rounded,
+                                      color: Color(0xFFDC2626),
+                                      size: 30,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'အကောင့်ထွက်ရန်',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'ဤအကောင့်မှ ထွက်ခွာရန် သေချာပါသလား?',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          style: OutlinedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            side: const BorderSide(
+                                              color: Color(0xFFCBD5E1),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'မလုပ်ပါ',
+                                            style: TextStyle(
+                                              color: Color(0xFF475569),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(
+                                              0xFFDC2626,
+                                            ),
+                                            elevation: 0,
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'ထွက်မည်',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          if (confirm == true) {
+                            try {
+                              await ApiService().logout();
+
+                              if (context.mounted) {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginView(),
+                                  ),
+                                  (route) => false,
+                                );
+                              }
+                            } catch (e) {
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.remove('token');
+                              await prefs.remove('fcm_token');
+
+                              if (context.mounted) {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginView(),
+                                  ),
+                                  (route) => false,
+                                );
+                              }
+                            }
+                          }
+                        },
                         padding: EdgeInsets.zero,
                       ),
                     ),
@@ -289,6 +417,9 @@ class _RestaurantAdminDashboardScreenState
           searchController: _searchController,
           filteredShops: _filteredShops,
           buildShopCard: _buildShopCard,
+          onShopAdded: () {
+            _fetchShopsData();
+          },
         );
 
       case 1:
@@ -316,8 +447,6 @@ class _RestaurantAdminDashboardScreenState
             });
           },
           onNavigateWithPhone: (phone, mode) {
-            print("📱 Navigating with Phone: $phone, Mode: $mode");
-
             setState(() {
               _scannedPhone = phone;
             });
@@ -341,10 +470,6 @@ class _RestaurantAdminDashboardScreenState
               _currentIndex = 0;
             });
           },
-          selectedCategory: '',
-          onCategorySelected: (String p1) {},
-          filteredHistory: [],
-          initialPhone: _scannedPhone,
         );
 
       case 4:
@@ -355,6 +480,9 @@ class _RestaurantAdminDashboardScreenState
           searchController: _searchController,
           filteredShops: _filteredShops,
           buildShopCard: _buildShopCard,
+          onShopAdded: () {
+            _fetchShopsData();
+          },
         );
     }
   }
@@ -486,7 +614,7 @@ class _RestaurantAdminDashboardScreenState
           Container(
             height: 66,
             decoration: BoxDecoration(
-              color: Colors.teal,
+              color: const Color(0xff0D6B80),
               borderRadius: BorderRadius.circular(33),
               boxShadow: [
                 BoxShadow(
@@ -568,7 +696,7 @@ class _RestaurantAdminDashboardScreenState
         width: 54,
         height: 54,
         decoration: BoxDecoration(
-          color: Colors.teal,
+          color: const Color(0xff0D6B80),
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 3.5),
           boxShadow: [
